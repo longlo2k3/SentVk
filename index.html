@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mây lời nhắn - Dành cho người yêu</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Dancing+Script:wght@400;600&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Mây nền động -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+    <div class="cloud cloud4"></div>
+
+    <!-- Card chính -->
+    <div class="cloud-card">
+        <div class="cloud-icon" id="cloudIcon">☁️✨</div>
+        <h1>Mây lời nhắn</h1>
+        <div class="sub">gửi đến người anh thương</div>
+        <div class="date-badge" id="dateDisplay"></div>
+
+        <div class="message-container" id="msgContainer">
+            <div class="message-text" id="messageText"></div>
+            <div class="image-note" id="iconMsg">💌</div>
+        </div>
+
+        <div>
+            <button class="btn-cloud" id="openCloudBtn">☁️ Mở mây hôm nay ☁️</button>
+            <button class="btn-cloud" id="heartRainBtn">💖 Thả tim yêu thương 💖</button>
+        </div>
+        <button class="music-toggle" id="musicToggleBtn">🎵 Bật nhạc nền</button>
+        <button class="history-btn" id="historyToggleBtn">📜 Xem lại lời nhắn cũ</button>
+
+        <div id="historyPanel" class="history-panel"></div>
+        <footer>Mỗi ngày một lời từ mây • Dành riêng cho em</footer>
+    </div>
+
+    <!-- Audio nhạc nền lãng mạn hơn (piano không lời) -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="./Làm Vợ Anh Nhé.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="app.js"></script>
+</body>
+</html>

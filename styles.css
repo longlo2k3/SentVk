@@ -1,0 +1,292 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(145deg, #b3e5fc 0%, #81d4fa 30%, #4fc3f7 70%, #29b6f6 100%);
+    font-family: 'Quicksand', 'Segoe UI', system-ui, sans-serif;
+    overflow-x: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* === MÂY NỀN ĐỘNG === */
+.cloud {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 1000px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    z-index: 1;
+    pointer-events: none;
+}
+.cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+}
+.cloud1 { width: 180px; height: 110px; top: 10%; left: -200px; animation: floatCloud 40s linear infinite; }
+.cloud1::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+.cloud1::after { width: 100px; height: 100px; top: -50px; left: 80px; }
+
+.cloud2 { width: 240px; height: 140px; bottom: 15%; right: -300px; animation: floatCloud 55s linear infinite reverse; opacity: 0.7; }
+.cloud2::before { width: 90px; height: 90px; top: -45px; left: 30px; }
+.cloud2::after { width: 120px; height: 120px; top: -60px; left: 100px; }
+
+.cloud3 { width: 150px; height: 90px; top: 40%; left: -150px; animation: floatCloud 32s linear infinite; animation-delay: -10s; opacity: 0.8; }
+.cloud3::before { width: 60px; height: 60px; top: -30px; left: 15px; }
+.cloud3::after { width: 85px; height: 85px; top: -42px; left: 65px; }
+
+.cloud4 { width: 300px; height: 170px; top: 70%; right: -350px; animation: floatCloud 70s linear infinite; animation-delay: -25s; opacity: 0.6; }
+.cloud4::before { width: 100px; height: 100px; top: -50px; left: 40px; }
+.cloud4::after { width: 140px; height: 140px; top: -70px; left: 130px; }
+
+@keyframes floatCloud {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 400px)); }
+}
+
+/* === HIỆU ỨNG TIM BAY === */
+.heart {
+    position: fixed;
+    bottom: 0;
+    font-size: 1.8rem;
+    pointer-events: none;
+    z-index: 15;
+    animation: flyHeart 6s ease-out forwards;
+    opacity: 0.8;
+}
+@keyframes flyHeart {
+    0% { transform: translateY(0) scale(0.5); opacity: 1; }
+    70% { opacity: 0.9; }
+    100% { transform: translateY(-100vh) scale(1.2) rotate(10deg); opacity: 0; }
+}
+
+/* === CARD CHÍNH === */
+.cloud-card {
+    position: relative;
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    border-radius: 70px 70px 80px 80px;
+    box-shadow: 0 25px 45px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.6);
+    padding: 30px 25px 45px;
+    width: 100%;
+    max-width: 650px;
+    text-align: center;
+    transition: all 0.4s ease;
+    border: 1px solid rgba(255,255,240,0.5);
+}
+
+.cloud-icon {
+    font-size: 5rem;
+    filter: drop-shadow(2px 6px 12px rgba(0,0,0,0.2));
+    animation: swayCloud 3s infinite ease-in-out;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.cloud-icon:hover {
+    transform: scale(1.05);
+}
+@keyframes swayCloud {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.4rem;
+    color: #fff9e0;
+    text-shadow: 3px 3px 0 #ff9f4a, 6px 6px 0 rgba(0,0,0,0.1);
+    margin: 15px 0 10px;
+    letter-spacing: 2px;
+}
+
+.sub {
+    color: #fff3cf;
+    background: #ffb34770;
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 1rem;
+    backdrop-filter: blur(4px);
+    margin-bottom: 25px;
+}
+
+.date-badge {
+    font-size: 1rem;
+    background: #ffffffee;
+    color: #e67e22;
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 40px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Vùng lời nhắn - đã sửa tràn chữ */
+.message-container {
+    background: rgba(255,250,235,0.85);
+    backdrop-filter: blur(4px);
+    border-radius: 65px;
+    padding: 25px 20px;
+    margin: 20px 0;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: all 0.3s;
+    border: 1px solid rgba(255,215,150,0.8);
+    box-shadow: inset 0 1px 4px #ffe3aa, 0 12px 20px -8px rgba(0,0,0,0.2);
+}
+
+.message-text {
+    font-size: 1.5rem;
+    line-height: 1.45;
+    font-weight: 600;
+    color: #b45f1b;
+    font-family: 'Dancing Script', cursive;
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    padding: 0 5px;
+    text-align: center;
+}
+.typing-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1.8rem;
+    background-color: #e67e22;
+    margin-left: 5px;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+}
+@keyframes blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.image-note {
+    margin-top: 12px;
+    font-size: 2.2rem;
+}
+
+/* Nút bấm */
+.btn-cloud {
+    background: linear-gradient(135deg, #ffd966, #ffb347);
+    border: none;
+    padding: 14px 28px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #4a2c0c;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: 0.25s;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 6px;
+}
+.btn-cloud:hover {
+    transform: scale(1.02) translateY(-3px);
+    background: linear-gradient(135deg, #ffe28a, #ffa559);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+}
+.btn-cloud:active {
+    transform: scale(0.98);
+}
+
+.music-toggle {
+    background: rgba(255,255,210,0.8);
+    border: none;
+    font-size: 1.2rem;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    margin-top: 10px;
+    backdrop-filter: blur(4px);
+}
+
+.history-btn {
+    background: none;
+    border: 1px dashed #ffdd99;
+    color: #fff2cf;
+    padding: 8px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    margin-top: 15px;
+}
+.history-panel {
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(12px);
+    border-radius: 48px;
+    padding: 15px;
+    margin-top: 20px;
+    display: none;
+    max-height: 250px;
+    overflow-y: auto;
+    text-align: left;
+    color: #fff3cf;
+}
+.history-panel.show {
+    display: block;
+    animation: fadeSlide 0.4s ease;
+}
+.history-item {
+    background: rgba(255,245,210,0.7);
+    margin: 8px 0;
+    padding: 10px 16px;
+    border-radius: 40px;
+    color: #a55d1a;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.1s;
+    word-break: break-word;
+}
+.history-item:hover {
+    background: #ffecb3;
+    transform: translateX(6px);
+}
+
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: #fff2cf;
+    opacity: 0.8;
+}
+
+/* Responsive cho điện thoại - fix tràn chữ */
+@media (max-width: 550px) {
+    .cloud-card { padding: 20px 15px; }
+    .message-text { font-size: 1.2rem; line-height: 1.4; }
+    h1 { font-size: 1.8rem; }
+    .btn-cloud { padding: 10px 18px; font-size: 1rem; gap: 8px; }
+    .message-container { padding: 20px 12px; }
+    .cloud-icon { font-size: 4rem; }
+}
+@media (max-width: 400px) {
+    .message-text { font-size: 1.1rem; }
+    .btn-cloud { padding: 8px 14px; font-size: 0.9rem; }
+}
