@@ -2,6 +2,17 @@
    Loads messages.json, initializes UI and event handlers
    Falls back to embedded data if fetch fails (for file:// protocol) */
 
+// Supabase Configuration
+const SUPABASE_URL = 'https://dtcfifgyibnpbrjkwzqg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_cR7PyaxfSItDQzHVI701kA_ZfhOFABj';
+let supabaseClient = null;
+
+// Khởi tạo Supabase
+if (typeof window.supabase !== 'undefined') {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase initialized');
+}
+
 let messageDB = [
     { date: "2026-05-20", message: "Hôm nay anh nhớ nụ cười của em lúc sáng. Làm anh vui cả ngày dài ☀️", icon: "🌻" },
     { date: "2026-05-21", message: "Bầu trời xanh như tình anh dành cho em, trong veo và không có điểm dừng 💙", icon: "💙" },
@@ -30,6 +41,15 @@ const musicToggleBtn = document.getElementById('musicToggleBtn');
 const bgMusic = document.getElementById('bgMusic');
 const historyToggleBtn = document.getElementById('historyToggleBtn');
 const historyPanel = document.getElementById('historyPanel');
+const adminPanel = document.getElementById('adminPanel');
+const closeAdminBtn = document.getElementById('closeAdminBtn');
+const submitAdminBtn = document.getElementById('submitAdminBtn');
+const adminDate = document.getElementById('adminDate');
+const adminMessage = document.getElementById('adminMessage');
+const adminIcon = document.getElementById('adminIcon');
+const adminNote = document.getElementById('adminNote');
+const adminStatus = document.getElementById('adminStatus');
+const messagesList = document.getElementById('messagesList');
 
 let currentMessageObj = null;
 let typingInterval = null;
@@ -195,6 +215,27 @@ musicToggleBtn.addEventListener('click', () => {
     }
 });
 
+// Admin Panel Event Listeners
+closeAdminBtn.addEventListener('click', () => {
+    hideAdminPanel();
+});
+
+adminPanel.addEventListener('click', (e) => {
+    if (e.target === adminPanel) {
+        hideAdminPanel();
+    }
+});
+
+submitAdminBtn.addEventListener('click', () => {
+    saveMessageToSupabase();
+});
+
+adminMessage.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') {
+        saveMessageToSupabase();
+    }
+});
+
 function initAutoMusic() {
     const startMusic = () => {
         bgMusic.play()
@@ -215,6 +256,152 @@ function initAutoMusic() {
     document.addEventListener('touchstart', startMusic);
 }
 
+// ========== ADMIN PANEL FUNCTIONS ==========
+function showAdminPanel() {
+    adminPanel.classList.add('show');
+    adminDate.valueAsDate = new Date();
+    loadMessagesFromSupabase();
+}
+
+function hideAdminPanel() {
+    adminPanel.classList.remove('show');
+}
+
+async function saveMessageToSupabase() {
+    const date = adminDate.value;
+    const message = adminMessage.value.trim();
+    const icon = adminIcon.value.trim() || '💌';
+    const note = adminNote.value.trim();
+    
+    if (!date || !message) {
+        showAdminStatus('❌ Vui lòng điền đầy đủ ngày và lời nhắn', 'error');
+        return;
+    }
+    
+    adminStatus.innerHTML = '⏳ Đang lưu...';
+    
+    try {
+        if (!supabaseClient) {
+            showAdminStatus('❌ Lỗi: Supabase chưa kết nối', 'error');
+            return;
+        }
+        
+        // Thêm vào database
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .insert([
+                {
+                    date: date,
+                    message: message,
+                    icon: icon,
+                    note: note,
+                    created_at: new Date().toISOString()
+                }
+            ])
+            .select();
+        
+        if (error) {
+            console.error('Supabase Error:', error);
+            showAdminStatus('❌ Lỗi: ' + error.message, 'error');
+            return;
+        }
+        
+        // Thêm vào local database
+        messageDB.push({
+            date: date,
+            message: message,
+            icon: icon
+        });
+        
+        // Nếu lưu cho ngày hôm nay, cập nhật ngay UI chính
+        if (date === getTodayString()) {
+            loadTodayMessage(true);
+            updateDateBadge();
+        }
+
+        showAdminStatus('✅ Lưu thành công!', 'success');
+        adminMessage.value = '';
+        adminIcon.value = '';
+        adminNote.value = '';
+        loadMessagesFromSupabase();
+    } catch (err) {
+        console.error('Error:', err);
+        showAdminStatus('❌ Lỗi: ' + err.message, 'error');
+    }
+}
+
+async function loadMessagesFromSupabase() {
+    try {
+        if (!supabaseClient) return;
+        
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .select('*')
+            .order('date', { ascending: false })
+            .limit(20);
+        
+        if (error) {
+            console.error('Load Error:', error);
+            return;
+        }
+        
+        messagesList.innerHTML = '';
+        if (data && data.length > 0) {
+            data.forEach(msg => {
+                const item = document.createElement('div');
+                item.className = 'message-item';
+                item.innerHTML = `
+                    <div class="msg-date">${msg.date}</div>
+                    <div class="msg-content">
+                        <span class="msg-icon">${msg.icon}</span>
+                        <span class="msg-text">${msg.message}</span>
+                    </div>
+                    ${msg.note ? `<div class="msg-note">📌 ${msg.note}</div>` : ''}
+                `;
+                messagesList.appendChild(item);
+            });
+        } else {
+            messagesList.innerHTML = '<p class="no-messages">Chưa có lời nhắn nào</p>';
+        }
+    } catch (err) {
+        console.error('Error loading messages:', err);
+    }
+}
+
+function showAdminStatus(message, type) {
+    adminStatus.innerHTML = message;
+    adminStatus.className = 'admin-status ' + type;
+    setTimeout(() => {
+        if (type === 'success') {
+            adminStatus.innerHTML = '';
+        }
+    }, 3000);
+}
+
+function checkAdminAccess() {
+    const pathHasAdmin = window.location.hash === '#/admin' || window.location.pathname.includes('/admin') || window.location.href.endsWith('/admin');
+    if (pathHasAdmin) {
+        // Normalize URL to avoid server routing issues: keep panel state in hash
+        if (!window.location.hash.includes('#/admin')) {
+            const newPath = window.location.pathname.replace(/\/admin\/?$/, '/') + window.location.search + '#/admin';
+            history.replaceState(null, '', newPath);
+        }
+        showAdminPanel();
+    }
+    
+    // Keyboard shortcut: Ctrl+Shift+A
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') {
+            e.preventDefault();
+            if (adminPanel.classList.contains('show')) {
+                hideAdminPanel();
+            } else {
+                showAdminPanel();
+            }
+        }
+    });
+}
+
 document.getElementById('cloudIcon').addEventListener('click', () => {
     startHeartRain(12);
     loadTodayMessage(true);
@@ -225,6 +412,7 @@ function init() {
     updateDateBadge();
     loadTodayMessage(true);
     initAutoMusic();
+    checkAdminAccess();
 
     setTimeout(() => startHeartRain(8), 200);
 

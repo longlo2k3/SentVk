@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Redirect</title>
+  <meta http-equiv="refresh" content="0; url=/#/admin">
+  <script>
+    // Fallback JS redirect if meta refresh not supported
+    (function(){
+      try {
+        var base = location.pathname.replace(/\/admin\/?$/, '/') || '/';
+        location.replace(base + '#/admin');
+      } catch(e){
+        location.replace('/#/admin');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <p>Đang chuyển hướng đến trang admin…</p>
+</body>
+</html>
