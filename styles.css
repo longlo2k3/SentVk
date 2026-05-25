@@ -530,3 +530,27 @@ footer {
         padding: 0 15px 15px;
     }
 }
+
+/* Public messages displayed on index.html */
+.public-messages {
+    margin: 18px auto 0;
+    max-width: 900px;
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.14);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #fff8e6;
+    text-align: left;
+}
+.public-messages h3 { color: #fff9e0; margin: 0 0 10px; }
+.public-messages .pub-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.public-messages .pub-item { background: rgba(255,250,240,0.06); padding: 12px; border-radius: 10px; border-left: 3px solid rgba(255,255,255,0.06); }
+.pub-date { font-size: 0.85rem; color: #ffe6b3; font-weight: 700; margin-bottom: 6px; }
+.pub-content { color: #fffaf0; line-height: 1.3; }
+
+@media (max-width: 600px) {
+    .public-messages { padding: 12px; }
+    .public-messages .pub-list { grid-template-columns: 1fr; }
+}

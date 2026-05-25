@@ -157,7 +157,6 @@ function renderHistory() {
             typeMessageEffect(item.message, item.icon, null);
             currentMessageObj = item;
             dateDisplaySpan.innerText = `Kỷ niệm ngày ${item.date} 💭`;
-            setTimeout(() => updateDateBadge(), 3000);
         });
         historyPanel.appendChild(div);
     });
@@ -323,7 +322,8 @@ async function saveMessageToSupabase() {
         adminMessage.value = '';
         adminIcon.value = '';
         adminNote.value = '';
-        loadMessagesFromSupabase();
+        // refresh both admin list and public index
+        await fetchAndSyncMessages();
     } catch (err) {
         console.error('Error:', err);
         showAdminStatus('❌ Lỗi: ' + err.message, 'error');
@@ -368,6 +368,44 @@ async function loadMessagesFromSupabase() {
     }
 }
 
+// Fetch messages for public index and sync local DB
+async function fetchAndSyncMessages() {
+    try {
+        if (supabaseClient) {
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .select('*')
+                .order('date', { ascending: false });
+            if (!error && data) {
+                // normalize dates to YYYY-MM-DD strings
+                messageDB = data.map(d => ({ date: d.date instanceof Date ? d.date.toISOString().slice(0,10) : String(d.date), message: d.message, icon: d.icon || '💌', note: d.note }));
+            }
+        }
+    } catch (err) {
+        console.error('Error syncing messages:', err);
+    }
+    // Render UI parts that depend on messageDB
+    renderHistory();
+    renderPublicMessages();
+    // Ensure the main display shows today's message if any
+    loadTodayMessage(true);
+}
+
+function renderPublicMessages() {
+    const container = document.getElementById('publicMessages');
+    if (!container) return;
+    container.innerHTML = '<h3>📬 Tất cả lời nhắn</h3>';
+    const list = document.createElement('div');
+    list.className = 'pub-list';
+    (messageDB.slice().sort((a,b) => new Date(b.date) - new Date(a.date))).forEach(msg => {
+        const item = document.createElement('div');
+        item.className = 'pub-item';
+        item.innerHTML = `<div class="pub-date">${msg.date}</div><div class="pub-content">${msg.icon || ''} ${msg.message}</div>`;
+        list.appendChild(item);
+    });
+    container.appendChild(list);
+}
+
 function showAdminStatus(message, type) {
     adminStatus.innerHTML = message;
     adminStatus.className = 'admin-status ' + type;
@@ -410,9 +448,10 @@ document.getElementById('cloudIcon').addEventListener('click', () => {
 
 function init() {
     updateDateBadge();
-    loadTodayMessage(true);
     initAutoMusic();
     checkAdminAccess();
+    // Sync messages from Supabase (if available) and render UI
+    fetchAndSyncMessages();
 
     setTimeout(() => startHeartRain(8), 200);
 
