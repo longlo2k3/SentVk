@@ -386,24 +386,8 @@ async function fetchAndSyncMessages() {
     }
     // Render UI parts that depend on messageDB
     renderHistory();
-    renderPublicMessages();
     // Ensure the main display shows today's message if any
     loadTodayMessage(true);
-}
-
-function renderPublicMessages() {
-    const container = document.getElementById('publicMessages');
-    if (!container) return;
-    container.innerHTML = '<h3>📬 Tất cả lời nhắn</h3>';
-    const list = document.createElement('div');
-    list.className = 'pub-list';
-    (messageDB.slice().sort((a,b) => new Date(b.date) - new Date(a.date))).forEach(msg => {
-        const item = document.createElement('div');
-        item.className = 'pub-item';
-        item.innerHTML = `<div class="pub-date">${msg.date}</div><div class="pub-content">${msg.icon || ''} ${msg.message}</div>`;
-        list.appendChild(item);
-    });
-    container.appendChild(list);
 }
 
 function showAdminStatus(message, type) {
