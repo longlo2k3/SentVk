@@ -399,6 +399,71 @@ footer {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+/* === FALLING TEXT EFFECT === */
+.falling-text-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 25; /* above card (20) but below admin panel (1000) */
+}
+.falling-text {
+    position: absolute;
+    left: 0;
+    top: -5vh;
+    white-space: nowrap;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transform-origin: center;
+    will-change: transform, opacity;
+    animation-name: fallDown;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+@keyframes fallDown {
+    0% {
+        transform: translateY(-10vh) rotate(-6deg) scale(0.95);
+        opacity: 0;
+    }
+    10% { opacity: 1; }
+    60% {
+        transform: translateY(calc(100vh - 60px)) rotate(4deg) scale(1);
+        opacity: 1;
+        animation-timing-function: ease-out;
+    }
+    75% {
+        transform: translateY(calc(100vh - 120px)) rotate(0deg) scale(1);
+        opacity: 1;
+        animation-timing-function: ease-in;
+    }
+    90% {
+        transform: translateY(calc(100vh - 60px)) rotate(-2deg) scale(1);
+        opacity: 1;
+        animation-timing-function: ease-out;
+    }
+    95% {
+        transform: translateY(calc(100vh - 80px)) rotate(1deg) scale(1);
+        opacity: 1;
+        animation-timing-function: ease-in;
+    }
+    100% {
+        transform: translateY(calc(100vh - 60px)) rotate(2deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* small responsive tweak */
+@media (max-width: 600px) {
+    .falling-text { font-size: 0.95rem !important; }
+}
+
 .admin-textarea {
     resize: vertical;
     min-height: 120px;

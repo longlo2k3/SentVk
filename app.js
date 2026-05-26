@@ -28,8 +28,8 @@ let messageDB = [
     { date: "2026-05-31", message: "Cuối tháng rồi, yêu thương chẳng bao giờ vơi cạn. Hãy luôn mỉm cười nhé công chúa 👸", icon: "👑" }
 ];
 
-const defaultMessage = "Vẫn luôn ở đây để yêu thương em mỗi ngàyngày💖";
-const defaultIcon = "🌙💫";
+const defaultMessage = messageDB.length > 0 ? messageDB[0].message : "Vẫn luôn ở đây để yêu thương em mỗi ngày💖";
+const defaultIcon = messageDB.length > 0 ? messageDB[0].icon : "🌙💫";
 
 // DOM elements (declared here so functions can use them)
 const openCloudBtn = document.getElementById('openCloudBtn');
@@ -50,6 +50,7 @@ const adminIcon = document.getElementById('adminIcon');
 const adminNote = document.getElementById('adminNote');
 const adminStatus = document.getElementById('adminStatus');
 const messagesList = document.getElementById('messagesList');
+const fallingContainer = document.getElementById('fallingContainer');
 
 let currentMessageObj = null;
 let typingInterval = null;
@@ -116,9 +117,9 @@ function loadTodayMessage(withTypingEffect = true) {
         icon = found.icon;
         currentMessageObj = found;
     } else {
-        msgText = defaultMessage;
-        icon = defaultIcon;
-        currentMessageObj = { date: today, message: defaultMessage, icon: defaultIcon };
+        msgText = messageDB.length > 0 ? messageDB[0].message : "Vẫn luôn ở đây để yêu thương em mỗi ngày💖";
+        icon = messageDB.length > 0 ? messageDB[0].icon : "🌙💫";
+        currentMessageObj = { date: today, message: msgText, icon: icon };
     }
     if (withTypingEffect) {
         typeMessageEffect(msgText, icon, () => {});
@@ -145,6 +146,86 @@ function startHeartRain(count = 25) {
     }
 }
 
+// === FALLING TEXT FUNCTIONS ===
+function createFallingTextElement(text) {
+    if (!fallingContainer) return null;
+    const el = document.createElement('div');
+    el.className = 'falling-text';
+    el.innerText = text;
+    const left = Math.random() * 100;
+    el.style.left = left + '%';
+    const size = (Math.random() * 1.2 + 0.9).toFixed(2);
+    el.style.fontSize = size + 'rem';
+    const duration = (Math.random() * 3 + 2).toFixed(2); // 2 - 5s to fall
+    el.style.animationDuration = duration + 's';
+    el.style.animationDelay = (Math.random() * 1.5).toFixed(2) + 's';
+    
+    // Hiệu ứng tản ra khi hover
+    el.addEventListener('mouseenter', function() {
+        const computedStyle = window.getComputedStyle(this);
+        const matrix = computedStyle.transform;
+        this.style.animation = 'none'; // Dừng hiệu ứng rơi
+        this.style.transform = matrix; // Cố định vị trí hiện tại
+
+        // Ép trình duyệt reflow
+        void this.offsetWidth;
+
+        // Hiệu ứng chuyển động mượt mà và nảy
+        this.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+        // Giới hạn tản ngang và bắt buộc nảy lên trên (âm Y) để không lọt khỏi màn hình
+        const scatterX = (Math.random() - 0.5) * 150; 
+        const scatterY = -(Math.random() * 150 + 50); 
+        const rot = (Math.random() - 0.5) * 60;
+
+        this.style.transform = `${matrix} translate(${scatterX}px, ${scatterY}px) rotate(${rot}deg) scale(1.2)`;
+
+        // Vô hiệu hóa bắt sự kiện chuột để không bị kẹt dồn matrix khi lướt qua lại
+        this.style.pointerEvents = 'none';
+        this.style.zIndex = '30';
+
+        // Sau khi nảy lên tản ra, rơi tiếp xuống dưới
+        setTimeout(() => {
+            this.style.transition = 'transform 2.5s cubic-bezier(0.55, 0.085, 0.68, 0.53), opacity 2.5s ease-in';
+            // Cho rơi thẳng xuống dưới màn hình (cộng thêm 1000px Y)
+            this.style.transform = `${matrix} translate(${scatterX}px, 1000px) rotate(${rot + (Math.random() - 0.5) * 90}deg) scale(1)`;
+            this.style.opacity = '0'; // Mờ dần khi rơi
+            
+            // Xóa element sau khi rơi xong
+            setTimeout(() => {
+                if (this.parentNode) this.parentNode.removeChild(this);
+            }, 2500);
+        }, 800); // Đợi 800ms cho hiệu ứng tản hoàn tất
+    }, { once: true });
+
+    fallingContainer.appendChild(el);
+    
+    // Simulate the text having actually fallen and staying there
+    setTimeout(() => {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+    }, 60000); // Remove after a long time so it looks like it piled up
+    
+    return el;
+}
+
+function startFallingText(count = 20, sourceText = null) {
+    const pieces = [];
+    // If no sourceText provided, default to the currently displayed message
+    if (!sourceText) {
+        sourceText = (messageTextDiv && messageTextDiv.innerText && messageTextDiv.innerText.trim()) || (currentMessageObj && currentMessageObj.message) || defaultMessage;
+    }
+    // split into words, filter short ones to improve visuals
+    sourceText.split(/\s+/).forEach(w => { if (w.trim()) pieces.push(w); });
+    const pool = pieces.length > 0 ? pieces : ['💖','✨','☁️','Yêu','Em','Anh',' nhớ','ngày','🌙','💕'];
+
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const text = pool[Math.floor(Math.random() * pool.length)];
+            createFallingTextElement(text);
+        }, i * 150); // giãn thời gian rơi ra xíu
+    }
+}
+
 function renderHistory() {
     historyPanel.innerHTML = '';
     messageDB.slice().sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(item => {
@@ -154,7 +235,10 @@ function renderHistory() {
         div.addEventListener('click', (e) => {
             e.stopPropagation();
             stopTyping();
-            typeMessageEffect(item.message, item.icon, null);
+            typeMessageEffect(item.message, item.icon, () => {
+                // After typing finished, start falling text for this message
+                startFallingText(20, item.message);
+            });
             currentMessageObj = item;
             dateDisplaySpan.innerText = `Kỷ niệm ngày ${item.date} 💭`;
         });
@@ -194,11 +278,15 @@ openCloudBtn.addEventListener('click', () => {
     iconCloud.style.transform = 'scale(1.2)';
     setTimeout(() => iconCloud.style.transform = '', 300);
     startHeartRain(10);
+    // start falling text using all words from the database
+    startFallingText(30, messageTextDiv ? messageTextDiv.innerText : null);
     tryAutoPlayMusic();
 });
 
 heartRainBtn.addEventListener('click', () => {
     startHeartRain(50);
+    // fun: also spawn falling text/emojis
+    startFallingText(40, messageTextDiv ? messageTextDiv.innerText : null);
     tryAutoPlayMusic();
 });
 
@@ -430,14 +518,15 @@ document.getElementById('cloudIcon').addEventListener('click', () => {
     tryAutoPlayMusic();
 });
 
-function init() {
+async function init() {
     updateDateBadge();
     initAutoMusic();
     checkAdminAccess();
     // Sync messages from Supabase (if available) and render UI
-    fetchAndSyncMessages();
+    await fetchAndSyncMessages();
 
     setTimeout(() => startHeartRain(8), 200);
+    setTimeout(() => startFallingText(30, messageTextDiv ? messageTextDiv.innerText : null), 400); // Tự động chạy chữ rơi khi vào trang
 
     console.log('✅ App initialized');
 }
